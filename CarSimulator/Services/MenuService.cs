@@ -7,6 +7,12 @@
             if (string.IsNullOrWhiteSpace(choice))
                 return false;
 
+            if (choice != choice.Trim())
+                return false;
+
+            if (choice.Contains('.') || choice.Contains(','))
+                return false;
+
             if (!int.TryParse(choice, out int number))
                 return false;
 
@@ -15,10 +21,10 @@
 
         public static int ParseMenuChoice(string choice)
         {
-            if (int.TryParse(choice, out int number))
-                return number;
+            if (!IsValidMenuChoice(choice))
+                return -1;
 
-            return -1; // Invalid choice
+            return int.Parse(choice);
         }
 
         public static string GetInvalidChoiceMessage()

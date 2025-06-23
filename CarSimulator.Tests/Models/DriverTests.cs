@@ -137,5 +137,66 @@ namespace CarSimulator.Tests.Models
             // Assert
             Assert.IsTrue(result.Contains("börjar bli trött"));
         }
+
+        [TestMethod]
+        public void Driver_ShouldImplementIDriver()
+        {
+            // Assert
+            Assert.IsTrue(_sut is IDriver);
+        }
+
+        [TestMethod]
+        public void IncreaseFatigue_ManyTimes_ShouldNotOverflow()
+        {
+            // Act
+            for (int i = 0; i < 1000; i++)
+            {
+                _sut.IncreaseFatigue();
+            }
+
+            // Assert
+            Assert.AreEqual(1000, _sut.Fatigue);
+            Assert.IsTrue(_sut.Fatigue > 0); // Säkerställ att det inte överflutet
+        }
+
+        [TestMethod]
+        public void GetFatigueWarning_ExtremelyHighFatigue_ShouldStillReturnCritical()
+        {
+            // Arrange
+            _sut.Fatigue = 50;
+
+            // Act
+            var result = _sut.GetFatigueWarning();
+
+            // Assert
+            Assert.IsTrue(result.Contains("KRITISK TRÖTTHET"));
+        }
+
+        // Test för att verifiera exakta meddelanden
+        [TestMethod]
+        public void GetFatigueWarning_Fatigue7_ShouldReturnExactMessage()
+        {
+            // Arrange
+            _sut.Fatigue = 7;
+
+            // Act
+            var result = _sut.GetFatigueWarning();
+
+            // Assert
+            Assert.AreEqual("Föraren börjar bli trött och behöver ta en rast.", result);
+        }
+
+        [TestMethod]
+        public void GetFatigueWarning_Fatigue10_ShouldReturnExactMessage()
+        {
+            // Arrange
+            _sut.Fatigue = 10;
+
+            // Act
+            var result = _sut.GetFatigueWarning();
+
+            // Assert
+            Assert.AreEqual("KRITISK TRÖTTHET! Föraren måste vila omedelbart!", result);
+        }
     }
 }

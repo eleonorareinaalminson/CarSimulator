@@ -22,8 +22,12 @@ namespace CarSimulator.Models
 
         public void ConsumeFuel()
         {
+            const double fuelConsumptionPerAction = 2.0; 
+
             if (Fuel > 0)
-                Fuel--;
+            {
+                Fuel = Math.Max(0, Fuel - fuelConsumptionPerAction);
+            }
         }
 
         public void Refuel()
