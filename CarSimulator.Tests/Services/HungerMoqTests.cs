@@ -5,7 +5,6 @@ namespace CarSimulator.Tests.Services
     [TestClass]
     public class HungerMoqTests
     {
-        // Future enum & interface för MOQ-tester!
         public enum HungerLevel
         {
             Full = 0,    // 0-5
@@ -65,91 +64,247 @@ namespace CarSimulator.Tests.Services
                              .Returns("Du SVÄLTER! Hitta mat snart!");
         }
 
-        [TestMethod]
-        public void HungerService_CalculateHungerLevel_ShouldReturnCorrectLevels()
-        {
-            // Act & Assert
-            Assert.AreEqual(HungerLevel.Full, _sut.CalculateHungerLevel(3));
-            Assert.AreEqual(HungerLevel.Hungry, _sut.CalculateHungerLevel(8));
-            Assert.AreEqual(HungerLevel.Starving, _sut.CalculateHungerLevel(15));
 
-            // Verify
-            _hungerServiceMock.Verify(x => x.CalculateHungerLevel(It.IsAny<int>()), Times.Exactly(3));
+        [TestMethod]
+        public void CalculateHungerLevel_WithLowHunger_ShouldReturnFull()
+        {
+            // Act
+            var result = _sut.CalculateHungerLevel(3);
+
+            // Assert
+            Assert.AreEqual(HungerLevel.Full, result);
         }
 
         [TestMethod]
-        public void HungerService_HungerProgression_EachActionIncreasesBy2()
+        public void CalculateHungerLevel_WithMediumHunger_ShouldReturnHungry()
         {
-            // Act - Simulate 3 actions
-            int hunger = 0;
-            hunger = _sut.IncreaseHunger(hunger, 2); // Action 1: 0 -> 2
-            hunger = _sut.IncreaseHunger(hunger, 2); // Action 2: 2 -> 4  
-            hunger = _sut.IncreaseHunger(hunger, 2); // Action 3: 4 -> 6
+            // Act
+            var result = _sut.CalculateHungerLevel(8);
 
             // Assert
-            Assert.AreEqual(6, hunger);
+            Assert.AreEqual(HungerLevel.Hungry, result);
+        }
+
+        [TestMethod]
+        public void CalculateHungerLevel_WithHighHunger_ShouldReturnStarving()
+        {
+            // Act
+            var result = _sut.CalculateHungerLevel(15);
+
+            // Assert
+            Assert.AreEqual(HungerLevel.Starving, result);
+        }
+
+        [TestMethod]
+        public void CalculateHungerLevel_WhenCalled_ShouldVerifyMockInvocation()
+        {
+            // Act
+            _sut.CalculateHungerLevel(5);
+
+            // Assert
+            _hungerServiceMock.Verify(x => x.CalculateHungerLevel(5), Times.Once);
+        }
+
+
+        [TestMethod]
+        public void CalculateHungerLevel_AtFullUpperBoundary_ShouldReturnFull()
+        {
+            // Act
+            var result = _sut.CalculateHungerLevel(5);
+
+            // Assert
+            Assert.AreEqual(HungerLevel.Full, result);
+        }
+
+        [TestMethod]
+        public void CalculateHungerLevel_AtHungryLowerBoundary_ShouldReturnHungry()
+        {
+            // Act
+            var result = _sut.CalculateHungerLevel(6);
+
+            // Assert
+            Assert.AreEqual(HungerLevel.Hungry, result);
+        }
+
+        [TestMethod]
+        public void CalculateHungerLevel_AtHungryUpperBoundary_ShouldReturnHungry()
+        {
+            // Act
+            var result = _sut.CalculateHungerLevel(10);
+
+            // Assert
+            Assert.AreEqual(HungerLevel.Hungry, result);
+        }
+
+        [TestMethod]
+        public void CalculateHungerLevel_AtStarvingLowerBoundary_ShouldReturnStarving()
+        {
+            // Act
+            var result = _sut.CalculateHungerLevel(11);
+
+            // Assert
+            Assert.AreEqual(HungerLevel.Starving, result);
+        }
+
+
+        [TestMethod]
+        public void IncreaseHunger_WithDefaultAmount_ShouldIncreaseByTwo()
+        {
+            // Act
+            var result = _sut.IncreaseHunger(0, 2);
+
+            // Assert
+            Assert.AreEqual(2, result);
+        }
+
+        [TestMethod]
+        public void IncreaseHunger_WithCurrentHunger_ShouldAddCorrectly()
+        {
+            // Act
+            var result = _sut.IncreaseHunger(4, 2);
+
+            // Assert
+            Assert.AreEqual(6, result);
+        }
+
+        [TestMethod]
+        public void IncreaseHunger_WhenCalledMultipleTimes_ShouldVerifyCallCount()
+        {
+            // Act
+            _sut.IncreaseHunger(0, 2);
+            _sut.IncreaseHunger(2, 2);
+            _sut.IncreaseHunger(4, 2);
+
+            // Assert
             _hungerServiceMock.Verify(x => x.IncreaseHunger(It.IsAny<int>(), 2), Times.Exactly(3));
         }
 
+
         [TestMethod]
-        public void HungerService_Eat_ShouldResetHungerToZero()
+        public void Eat_WhenCalled_ShouldReturnZero()
         {
             // Act
-            var hungerAfterEating = _sut.Eat();
+            var result = _sut.Eat();
 
             // Assert
-            Assert.AreEqual(0, hungerAfterEating);
+            Assert.AreEqual(0, result);
+        }
+
+        [TestMethod]
+        public void Eat_WhenCalled_ShouldVerifyMockInvocation()
+        {
+            // Act
+            _sut.Eat();
+
+            // Assert
             _hungerServiceMock.Verify(x => x.Eat(), Times.Once);
         }
 
-        [TestMethod]
-        public void HungerService_GameOver_ShouldTriggerAt16Hunger()
-        {
-            // Act & Assert
-            Assert.IsFalse(_sut.IsGameOver(15));
-            Assert.IsTrue(_sut.IsGameOver(16));
-            Assert.IsTrue(_sut.IsGameOver(20));
 
-            _hungerServiceMock.Verify(x => x.IsGameOver(It.IsAny<int>()), Times.Exactly(3));
+        [TestMethod]
+        public void IsGameOver_BelowThreshold_ShouldReturnFalse()
+        {
+            // Act
+            var result = _sut.IsGameOver(15);
+
+            // Assert
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void HungerService_GetHungerMessage_ShouldReturnCorrectMessages()
+        public void IsGameOver_AtThreshold_ShouldReturnTrue()
         {
-            // Act & Assert
-            Assert.AreEqual("Du är mätt!", _sut.GetHungerMessage(3));
-            Assert.AreEqual("Du börjar bli hungrig...", _sut.GetHungerMessage(8));
-            Assert.AreEqual("Du SVÄLTER! Hitta mat snart!", _sut.GetHungerMessage(15));
+            // Act
+            var result = _sut.IsGameOver(16);
 
-            _hungerServiceMock.Verify(x => x.GetHungerMessage(It.IsAny<int>()), Times.Exactly(3));
+            // Assert
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void HungerService_CompleteGameScenario_ShouldReachGameOver()
+        public void IsGameOver_AboveThreshold_ShouldReturnTrue()
         {
-            // Act - Simulate 8 actions to reach game over
+            // Act
+            var result = _sut.IsGameOver(20);
+
+            // Assert
+            Assert.IsTrue(result);
+        }
+
+
+        [TestMethod]
+        public void GetHungerMessage_WithLowHunger_ShouldReturnFullMessage()
+        {
+            // Act
+            var result = _sut.GetHungerMessage(3);
+
+            // Assert
+            Assert.AreEqual("Du är mätt!", result);
+        }
+
+        [TestMethod]
+        public void GetHungerMessage_WithMediumHunger_ShouldReturnHungryMessage()
+        {
+            // Act
+            var result = _sut.GetHungerMessage(8);
+
+            // Assert
+            Assert.AreEqual("Du börjar bli hungrig...", result);
+        }
+
+        [TestMethod]
+        public void GetHungerMessage_WithHighHunger_ShouldReturnStarvingMessage()
+        {
+            // Act
+            var result = _sut.GetHungerMessage(15);
+
+            // Assert
+            Assert.AreEqual("Du SVÄLTER! Hitta mat snart!", result);
+        }
+
+
+        [TestMethod]
+        public void HungerProgression_AfterThreeActions_ShouldReachSixHunger()
+        {
+            // Arrange
             int hunger = 0;
+
+            // Act
+            hunger = _sut.IncreaseHunger(hunger, 2);
+            hunger = _sut.IncreaseHunger(hunger, 2);
+            hunger = _sut.IncreaseHunger(hunger, 2);
+
+            // Assert
+            Assert.AreEqual(6, hunger);
+        }
+
+        [TestMethod]
+        public void CompleteGameScenario_AfterEightActions_ShouldReachGameOver()
+        {
+            // Arrange
+            int hunger = 0;
+
+            // Act
             for (int i = 0; i < 8; i++)
             {
                 hunger = _sut.IncreaseHunger(hunger, 2);
             }
 
             // Assert
-            Assert.AreEqual(16, hunger); // 8 actions * 2 = 16
-            Assert.IsTrue(_sut.IsGameOver(hunger));
+            Assert.AreEqual(16, hunger);
         }
 
         [TestMethod]
-        public void HungerService_BoundaryTesting_ShouldHandleEdgeCases()
+        public void CompleteGameScenario_AtGameOverHunger_ShouldTriggerGameOver()
         {
-            // Test exact boundaries
-            Assert.AreEqual(HungerLevel.Full, _sut.CalculateHungerLevel(5));     // Last Full
-            Assert.AreEqual(HungerLevel.Hungry, _sut.CalculateHungerLevel(6));   // First Hungry
-            Assert.AreEqual(HungerLevel.Hungry, _sut.CalculateHungerLevel(10));  // Last Hungry
-            Assert.AreEqual(HungerLevel.Starving, _sut.CalculateHungerLevel(11)); // First Starving
+            // Arrange
+            int gameOverHunger = 16;
 
-            // Verify boundary tests
-            _hungerServiceMock.Verify(x => x.CalculateHungerLevel(It.IsAny<int>()), Times.Exactly(4));
+            // Act
+            var isGameOver = _sut.IsGameOver(gameOverHunger);
+
+            // Assert
+            Assert.IsTrue(isGameOver);
         }
     }
 }

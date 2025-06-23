@@ -14,12 +14,28 @@ namespace CarSimulator.Tests.Models
             _sut = new Driver("Test Driver", "test@example.com");
         }
 
+
         [TestMethod]
         public void NewDriver_ShouldHaveZeroFatigue()
         {
             // Act & Assert
             Assert.AreEqual(0, _sut.Fatigue);
         }
+
+        [TestMethod]
+        public void NewDriver_ShouldHaveCorrectName()
+        {
+            // Act & Assert
+            Assert.AreEqual("Test Driver", _sut.Name);
+        }
+
+        [TestMethod]
+        public void NewDriver_ShouldHaveCorrectEmail()
+        {
+            // Act & Assert
+            Assert.AreEqual("test@example.com", _sut.Email);
+        }
+
 
         [TestMethod]
         public void IncreaseFatigue_ShouldIncreaseByOne()
@@ -29,6 +45,18 @@ namespace CarSimulator.Tests.Models
 
             // Assert
             Assert.AreEqual(1, _sut.Fatigue);
+        }
+
+        [TestMethod]
+        public void IncreaseFatigue_MultipleTimes_ShouldAccumulate()
+        {
+            // Act
+            _sut.IncreaseFatigue();
+            _sut.IncreaseFatigue();
+            _sut.IncreaseFatigue();
+
+            // Assert
+            Assert.AreEqual(3, _sut.Fatigue);
         }
 
         [TestMethod]
@@ -44,21 +72,22 @@ namespace CarSimulator.Tests.Models
             Assert.AreEqual(0, _sut.Fatigue);
         }
 
+
         [TestMethod]
-        public void GetFatigueWarning_ShouldReturnCriticalWarning_WhenFatigueIs10()
+        public void GetFatigueWarning_LowFatigue_ShouldReturnEmptyString()
         {
             // Arrange
-            _sut.Fatigue = 10;
+            _sut.Fatigue = 5;
 
             // Act
             var result = _sut.GetFatigueWarning();
 
             // Assert
-            Assert.IsTrue(result.Contains("KRITISK TRÖTTHET"));
+            Assert.AreEqual("", result);
         }
 
         [TestMethod]
-        public void GetFatigueWarning_ShouldReturnWarning_WhenFatigueIs7()
+        public void GetFatigueWarning_ModerateFatigue_ShouldReturnWarning()
         {
             // Arrange
             _sut.Fatigue = 7;
@@ -71,16 +100,42 @@ namespace CarSimulator.Tests.Models
         }
 
         [TestMethod]
-        public void GetFatigueWarning_ShouldReturnEmptyString_WhenFatigueIsLow()
+        public void GetFatigueWarning_HighFatigue_ShouldReturnCriticalWarning()
         {
             // Arrange
-            _sut.Fatigue = 5;
+            _sut.Fatigue = 10;
+
+            // Act
+            var result = _sut.GetFatigueWarning();
+
+            // Assert
+            Assert.IsTrue(result.Contains("KRITISK TRÖTTHET"));
+        }
+
+        [TestMethod]
+        public void GetFatigueWarning_BoundaryAt6_ShouldReturnEmptyString()
+        {
+            // Arrange
+            _sut.Fatigue = 6;
 
             // Act
             var result = _sut.GetFatigueWarning();
 
             // Assert
             Assert.AreEqual("", result);
+        }
+
+        [TestMethod]
+        public void GetFatigueWarning_BoundaryAt9_ShouldReturnWarning()
+        {
+            // Arrange
+            _sut.Fatigue = 9;
+
+            // Act
+            var result = _sut.GetFatigueWarning();
+
+            // Assert
+            Assert.IsTrue(result.Contains("börjar bli trött"));
         }
     }
 }
