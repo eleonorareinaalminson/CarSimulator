@@ -7,12 +7,12 @@ namespace CarSimulator.Models
     {
         public Direction Direction { get; set; }
         public double Fuel { get; set; }
-        public double MaxFuel { get; private set; } = 50.0;
+        public double MaxFuel { get; private set; } = 20.0; 
 
         public Car()
         {
             Direction = Direction.North;
-            Fuel = MaxFuel;
+            Fuel = MaxFuel; 
         }
 
         public bool HasFuel()
@@ -28,7 +28,7 @@ namespace CarSimulator.Models
 
         public void Refuel()
         {
-            Fuel = MaxFuel;
+            Fuel = MaxFuel; // Fyller till 20 liter
         }
 
         public void TurnLeft()
