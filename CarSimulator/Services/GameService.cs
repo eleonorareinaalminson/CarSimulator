@@ -9,8 +9,8 @@ namespace CarSimulator.Services
         private readonly IRandomUserService _randomUserService;
         private IDriver _driver;
         private ICar _car;
-        private string _lastActionMessage = ""; // För att visa senaste handlingen
-        private bool _isErrorMessage = false; // För att veta om meddelandet är ett fel
+        private string _lastActionMessage = "";
+        private bool _isErrorMessage = false; 
 
         public GameService() : this(new RandomUserService())
         {
