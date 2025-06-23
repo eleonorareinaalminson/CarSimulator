@@ -14,19 +14,151 @@ namespace CarSimulator.Tests.Services
             _sut = new RandomUserService();
         }
 
+
         [TestMethod]
-        public async Task GetRandomDriver_FromAPI_ShouldReturnValidDriver()
+        public async Task GetRandomDriver_FromAPI_ShouldReturnNonNullDriver()
         {
             // Act
             var result = await _sut.GetRandomDriverAsync();
 
             // Assert
             Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_FromAPI_ShouldReturnDriverWithName()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
             Assert.IsNotNull(result.Name);
-            Assert.IsNotNull(result.Email);
             Assert.IsTrue(result.Name.Length > 0);
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_FromAPI_ShouldReturnDriverWithEmail()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsNotNull(result.Email);
             Assert.IsTrue(result.Email.Contains("@"));
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_FromAPI_ShouldReturnDriverWithZeroFatigue()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
             Assert.AreEqual(0, result.Fatigue);
+        }
+
+
+        [TestMethod]
+        public async Task GetRandomDriver_Email_ShouldContainAtSymbol()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsTrue(result.Email.Contains("@"));
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_Email_ShouldContainDot()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsTrue(result.Email.Contains("."));
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_Email_ShouldHaveMinimumLength()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsTrue(result.Email.Length > 5); // Minsta rimliga e-post
+        }
+
+
+        [TestMethod]
+        public async Task GetRandomDriver_Name_ShouldHaveMinimumLength()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsTrue(result.Name.Length >= 2); // Minst 2 tecken
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_Name_ShouldHaveMaximumLength()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsTrue(result.Name.Length <= 100); // Max 100 tecken
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_Name_ShouldNotBeWhitespace()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result.Name));
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_Name_ShouldContainSpace()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsTrue(result.Name.Contains(" "), "Name should contain at least one space (first + last name)");
+        }
+
+
+        [TestMethod]
+        public void RandomUserService_ShouldImplementIRandomUserService()
+        {
+            // Arrange & Act (done in Setup)
+
+            // Assert
+            Assert.IsTrue(_sut is IRandomUserService);
+        }
+
+        [TestMethod]
+        public void RandomUserService_ShouldBeOfCorrectType()
+        {
+            // Arrange & Act (done in Setup)
+
+            // Assert
+            Assert.IsTrue(_sut is RandomUserService);
+        }
+
+
+        [TestMethod]
+        public async Task GetRandomDriver_MultipleCalls_ShouldReturnValidDrivers()
+        {
+            // Act
+            var driver1 = await _sut.GetRandomDriverAsync();
+            var driver2 = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsNotNull(driver1);
+            Assert.IsNotNull(driver2);
         }
 
         [TestMethod]
@@ -37,61 +169,39 @@ namespace CarSimulator.Tests.Services
             var driver2 = await _sut.GetRandomDriverAsync();
 
             // Assert
-            Assert.IsNotNull(driver1);
-            Assert.IsNotNull(driver2);
-
-            // Förare ska vara olika (extremt låg sannolikhet att få samma)
             var isDifferent = driver1.Name != driver2.Name || driver1.Email != driver2.Email;
             Assert.IsTrue(isDifferent, "Multiple API calls should return different drivers");
         }
 
+
         [TestMethod]
-        public async Task GetRandomDriver_ShouldReturnDriverWithValidEmailFormat()
+        public async Task GetRandomDriver_APIResponse_ShouldHaveConsistentNameProperty()
         {
             // Act
             var result = await _sut.GetRandomDriverAsync();
 
             // Assert
-            Assert.IsNotNull(result.Email);
-            Assert.IsTrue(result.Email.Contains("@"));
-            Assert.IsTrue(result.Email.Contains("."));
-            Assert.IsTrue(result.Email.Length > 5); // Minsta rimliga e-post
-        }
-
-        [TestMethod]
-        public async Task GetRandomDriver_ShouldReturnDriverWithReasonableName()
-        {
-            // Act
-            var result = await _sut.GetRandomDriverAsync();
-
-            // Assert
-            Assert.IsNotNull(result.Name);
-            Assert.IsTrue(result.Name.Length >= 2); // Minst 2 tecken
-            Assert.IsTrue(result.Name.Length <= 100); // Max 100 tecken
-            Assert.IsFalse(string.IsNullOrWhiteSpace(result.Name));
-        }
-
-        [TestMethod]
-        public void RandomUserService_ShouldImplementIRandomUserService()
-        {
-            // Assert
-            Assert.IsTrue(_sut is IRandomUserService);
-            Assert.IsTrue(_sut is RandomUserService);
-        }
-
-        [TestMethod]
-        public async Task GetRandomDriver_APIResponse_ShouldBeConsistent()
-        {
-            // Act
-            var result = await _sut.GetRandomDriverAsync();
-
-            // Assert - Kontrollera att alla förväntade egenskaper finns
             Assert.IsNotNull(result.Name, "Name should not be null");
-            Assert.IsNotNull(result.Email, "Email should not be null");
-            Assert.AreEqual(0, result.Fatigue, "New driver should have 0 fatigue");
+        }
 
-            // Kontrollera att namn innehåller minst ett mellanslag (förnamn + efternamn)
-            Assert.IsTrue(result.Name.Contains(" "), "Name should contain at least one space (first + last name)");
+        [TestMethod]
+        public async Task GetRandomDriver_APIResponse_ShouldHaveConsistentEmailProperty()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.IsNotNull(result.Email, "Email should not be null");
+        }
+
+        [TestMethod]
+        public async Task GetRandomDriver_APIResponse_ShouldHaveConsistentFatigueProperty()
+        {
+            // Act
+            var result = await _sut.GetRandomDriverAsync();
+
+            // Assert
+            Assert.AreEqual(0, result.Fatigue, "New driver should have 0 fatigue");
         }
     }
 }

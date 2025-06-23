@@ -15,8 +15,9 @@ namespace CarSimulator.Tests.Models
             _sut = new Car();
         }
 
+
         [TestMethod]
-        public void NewCar_ShouldHaveFullTankAndNorthDirection()
+        public void NewCar_ShouldHaveCorrectFuelAmount()
         {
             // Arrange & Act
             var sut = new Car();
@@ -24,8 +25,18 @@ namespace CarSimulator.Tests.Models
             // Assert
             Assert.AreEqual(20.0, sut.Fuel);
             Assert.AreEqual(20.0, sut.MaxFuel);
+        }
+
+        [TestMethod]
+        public void NewCar_ShouldStartFacingNorth()
+        {
+            // Arrange & Act
+            var sut = new Car();
+
+            // Assert
             Assert.AreEqual(Direction.North, sut.Direction);
         }
+
 
         [TestMethod]
         public void HasFuel_WhenFuelExists_ShouldReturnTrue()
@@ -79,8 +90,9 @@ namespace CarSimulator.Tests.Models
             Assert.AreEqual(_sut.MaxFuel, _sut.Fuel);
         }
 
+
         [TestMethod]
-        public void TurnLeft_FromNorth_ShouldGiveWest()
+        public void TurnLeft_FromNorth_ShouldFaceWest()
         {
             // Arrange
             _sut.Direction = Direction.North;
@@ -93,7 +105,47 @@ namespace CarSimulator.Tests.Models
         }
 
         [TestMethod]
-        public void TurnRight_FromNorth_ShouldGiveEast()
+        public void TurnLeft_FromEast_ShouldFaceNorth()
+        {
+            // Arrange
+            _sut.Direction = Direction.East;
+
+            // Act
+            _sut.TurnLeft();
+
+            // Assert
+            Assert.AreEqual(Direction.North, _sut.Direction);
+        }
+
+        [TestMethod]
+        public void TurnLeft_FromSouth_ShouldFaceEast()
+        {
+            // Arrange
+            _sut.Direction = Direction.South;
+
+            // Act
+            _sut.TurnLeft();
+
+            // Assert
+            Assert.AreEqual(Direction.East, _sut.Direction);
+        }
+
+        [TestMethod]
+        public void TurnLeft_FromWest_ShouldFaceSouth()
+        {
+            // Arrange
+            _sut.Direction = Direction.West;
+
+            // Act
+            _sut.TurnLeft();
+
+            // Assert
+            Assert.AreEqual(Direction.South, _sut.Direction);
+        }
+
+
+        [TestMethod]
+        public void TurnRight_FromNorth_ShouldFaceEast()
         {
             // Arrange
             _sut.Direction = Direction.North;
@@ -106,40 +158,95 @@ namespace CarSimulator.Tests.Models
         }
 
         [TestMethod]
-        public void AllDirections_TestNorthSouthEastWest()
+        public void TurnRight_FromEast_ShouldFaceSouth()
+        {
+            // Arrange
+            _sut.Direction = Direction.East;
+
+            // Act
+            _sut.TurnRight();
+
+            // Assert
+            Assert.AreEqual(Direction.South, _sut.Direction);
+        }
+
+        [TestMethod]
+        public void TurnRight_FromSouth_ShouldFaceWest()
+        {
+            // Arrange
+            _sut.Direction = Direction.South;
+
+            // Act
+            _sut.TurnRight();
+
+            // Assert
+            Assert.AreEqual(Direction.West, _sut.Direction);
+        }
+
+        [TestMethod]
+        public void TurnRight_FromWest_ShouldFaceNorth()
+        {
+            // Arrange
+            _sut.Direction = Direction.West;
+
+            // Act
+            _sut.TurnRight();
+
+            // Assert
+            Assert.AreEqual(Direction.North, _sut.Direction);
+        }
+
+
+        [TestMethod]
+        public void GetDirectionInSwedish_North_ShouldReturnNorr()
         {
             // Arrange
             _sut.Direction = Direction.North;
 
-            // Act & Assert
-            _sut.TurnRight();
-            Assert.AreEqual(Direction.East, _sut.Direction);
+            // Act
+            var result = _sut.GetDirectionInSwedish();
 
-            _sut.TurnRight();
-            Assert.AreEqual(Direction.South, _sut.Direction);
-
-            _sut.TurnRight();
-            Assert.AreEqual(Direction.West, _sut.Direction);
-
-            _sut.TurnRight();
-            Assert.AreEqual(Direction.North, _sut.Direction);
+            // Assert
+            Assert.AreEqual("Norr", result);
         }
 
         [TestMethod]
-        public void GetDirectionInSwedish_ShouldReturnSwedishNames()
+        public void GetDirectionInSwedish_South_ShouldReturnSöder()
         {
-            // Test all directions using SUT
-            _sut.Direction = Direction.North;
-            Assert.AreEqual("Norr", _sut.GetDirectionInSwedish());
-
+            // Arrange
             _sut.Direction = Direction.South;
-            Assert.AreEqual("Söder", _sut.GetDirectionInSwedish());
 
+            // Act
+            var result = _sut.GetDirectionInSwedish();
+
+            // Assert
+            Assert.AreEqual("Söder", result);
+        }
+
+        [TestMethod]
+        public void GetDirectionInSwedish_East_ShouldReturnÖster()
+        {
+            // Arrange
             _sut.Direction = Direction.East;
-            Assert.AreEqual("Öster", _sut.GetDirectionInSwedish());
 
+            // Act
+            var result = _sut.GetDirectionInSwedish();
+
+            // Assert
+            Assert.AreEqual("Öster", result);
+        }
+
+        [TestMethod]
+        public void GetDirectionInSwedish_West_ShouldReturnVäster()
+        {
+            // Arrange
             _sut.Direction = Direction.West;
-            Assert.AreEqual("Väster", _sut.GetDirectionInSwedish());
+
+            // Act
+            var result = _sut.GetDirectionInSwedish();
+
+            // Assert
+            Assert.AreEqual("Väster", result);
         }
     }
 }
