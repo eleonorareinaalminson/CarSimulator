@@ -248,5 +248,63 @@ namespace CarSimulator.Tests.Models
             // Assert
             Assert.AreEqual("Väster", result);
         }
+
+        [TestMethod]
+        public void ConsumeFuel_WhenNoFuel_ShouldStayAtZero()
+        {
+            // Arrange
+            _sut.Fuel = 0;
+
+            // Act
+            _sut.ConsumeFuel();
+
+            // Assert
+            Assert.AreEqual(0, _sut.Fuel);
+        }
+
+        [TestMethod]
+        public void ConsumeFuel_WithMinimalFuel_ShouldHandleCorrectly()
+        {
+            // Arrange
+            _sut.Fuel = 0.1;
+
+            // Act
+            _sut.ConsumeFuel();
+
+            // Assert
+            Assert.AreEqual(0, _sut.Fuel, 0.001); // Med delta för double-jämförelse
+        }
+
+        [TestMethod]
+        public void TurnLeft_FourTimes_ShouldReturnToOriginalDirection()
+        {
+            // Arrange
+            var originalDirection = _sut.Direction;
+
+            // Act
+            for (int i = 0; i < 4; i++)
+            {
+                _sut.TurnLeft();
+            }
+
+            // Assert
+            Assert.AreEqual(originalDirection, _sut.Direction);
+        }
+
+        [TestMethod]
+        public void TurnRight_FourTimes_ShouldReturnToOriginalDirection()
+        {
+            // Arrange
+            var originalDirection = _sut.Direction;
+
+            // Act
+            for (int i = 0; i < 4; i++)
+            {
+                _sut.TurnRight();
+            }
+
+            // Assert
+            Assert.AreEqual(originalDirection, _sut.Direction);
+        }
     }
 }
