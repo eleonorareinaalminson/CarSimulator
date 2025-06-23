@@ -9,6 +9,7 @@ namespace CarSimulator.Services
         private readonly IRandomUserService _randomUserService;
         private IDriver _driver;
         private ICar _car;
+        private string _lastActionMessage = ""; 
 
         public GameService() : this(new RandomUserService())
         {
@@ -28,27 +29,44 @@ namespace CarSimulator.Services
             _driver = await _randomUserService.GetRandomDriverAsync();
 
             Console.WriteLine($"Din bilförare: {_driver.Name}");
-            Console.WriteLine($"Email: {_driver.Email}\n");
+            Console.WriteLine($"Email: {_driver.Email}");
+            Console.WriteLine("\nTryck på valfri tangent för att börja...");
+            Console.ReadKey();
 
             bool continueGame = true;
             while (continueGame)
             {
-                ShowMenu();
-                ShowStatus();
+                Console.Clear(); 
 
-                var warning = _driver.GetFatigueWarning();
-                if (!string.IsNullOrEmpty(warning))
-                {
-                    _driver.ShowFatigueWarningWithColor();
-                }
+                ShowGameScreen();
 
                 Console.Write("\nVälj ett alternativ: ");
                 var choice = Console.ReadLine();
 
                 continueGame = HandleMenuChoice(choice);
+
+                if (continueGame && !string.IsNullOrEmpty(_lastActionMessage))
+                {
+                    Thread.Sleep(1000);
+                }
             }
 
+            Console.Clear();
             Console.WriteLine("Tack för att du spelade Bil-Simulatorn!");
+        }
+
+        private void ShowGameScreen()
+        {
+            Console.WriteLine("=== BIL-SIMULATOR ===\n");
+
+            if (!string.IsNullOrEmpty(_lastActionMessage))
+            {
+                Console.WriteLine($"Senaste handling: {_lastActionMessage}\n");
+            }
+
+            ShowStatus();
+            ShowWarnings();
+            ShowMenu();
         }
 
         private void ShowMenu()
@@ -66,15 +84,22 @@ namespace CarSimulator.Services
 
         private void ShowStatus()
         {
-            Console.WriteLine($"\n--- FÖRARENS OCH BILENS STATUS ---");
-            Console.WriteLine($"Bilföraren {_driver.Name} kör åt {_car.GetDirectionInSwedish()}");
-            Console.WriteLine($"Bilens riktning: {_car.GetDirectionInSwedish()}");
+            Console.WriteLine($"Förare: {_driver.Name}");
+            Console.WriteLine($"Riktning: {_car.GetDirectionInSwedish()}");
 
-            // Färgkodad bensin baserat på nivå
             ShowFuelStatus();
 
-            // Färgkodad trötthet baserat på nivå
             ShowFatigueStatus();
+        }
+
+        private void ShowWarnings()
+        {
+            var warning = _driver.GetFatigueWarning();
+            if (!string.IsNullOrEmpty(warning))
+            {
+                Console.WriteLine();
+                _driver.ShowFatigueWarningWithColor();
+            }
         }
 
         private void ShowFuelStatus()
@@ -85,17 +110,14 @@ namespace CarSimulator.Services
 
             if (fuelPercentage > 50)
             {
-                // Grönt när OK (över 50%)
                 Console.ForegroundColor = ConsoleColor.Green;
             }
             else if (fuelPercentage > 20)
             {
-                // Gult när lågt (20-50%)
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
             else
             {
-                // Rött när kritiskt (under 20%)
                 Console.ForegroundColor = ConsoleColor.Red;
             }
 
@@ -105,21 +127,18 @@ namespace CarSimulator.Services
 
         private void ShowFatigueStatus()
         {
-            Console.Write("Förarens trötthet: ");
+            Console.Write("Trötthet: ");
 
             if (_driver.Fatigue <= 5)
             {
-                // Grönt när OK (0-5)
                 Console.ForegroundColor = ConsoleColor.Green;
             }
             else if (_driver.Fatigue <= 8)
             {
-                // Gult när trött (6-8)
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
             else
             {
-                // Rött när kritiskt (9-10)
                 Console.ForegroundColor = ConsoleColor.Red;
             }
 
@@ -145,6 +164,7 @@ namespace CarSimulator.Services
                     return true;
                 case "5":
                     _driver.Rest();
+                    _lastActionMessage = $"{_driver.Name} tar en rast och känner sig utvilad!";
                     return true;
                 case "6":
                     RefuelCar();
@@ -152,7 +172,7 @@ namespace CarSimulator.Services
                 case "7":
                     return false;
                 default:
-                    Console.WriteLine("Ogiltigt val! Välj 1-7.");
+                    _lastActionMessage = "Ogiltigt val! Välj 1-7.";
                     return true;
             }
         }
@@ -161,9 +181,7 @@ namespace CarSimulator.Services
         {
             if (!_car.HasFuel())
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Bensinen är slut! Du måste tanka innan bilen kan röra sig.");
-                Console.ResetColor();
+                _lastActionMessage = "Bensinen är slut! Du måste tanka innan bilen kan röra sig.";
                 return;
             }
 
@@ -171,18 +189,14 @@ namespace CarSimulator.Services
             _car.ConsumeFuel();
             _driver.IncreaseFatigue();
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Bilen svänger vänster och är nu riktad åt {_car.GetDirectionInSwedish()}.");
-            Console.ResetColor();
+            _lastActionMessage = $"Bilen svänger vänster och är nu riktad åt {_car.GetDirectionInSwedish()}.";
         }
 
         private void TurnRight()
         {
             if (!_car.HasFuel())
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Bensinen är slut! Du måste tanka innan bilen kan röra sig.");
-                Console.ResetColor();
+                _lastActionMessage = "Bensinen är slut! Du måste tanka innan bilen kan röra sig.";
                 return;
             }
 
@@ -190,45 +204,35 @@ namespace CarSimulator.Services
             _car.ConsumeFuel();
             _driver.IncreaseFatigue();
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Bilen svänger höger och är nu riktad åt {_car.GetDirectionInSwedish()}.");
-            Console.ResetColor();
+            _lastActionMessage = $"Bilen svänger höger och är nu riktad åt {_car.GetDirectionInSwedish()}.";
         }
 
         private void DriveForward()
         {
             if (!_car.HasFuel())
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Bensinen är slut! Du måste tanka innan bilen kan röra sig.");
-                Console.ResetColor();
+                _lastActionMessage = "Bensinen är slut! Du måste tanka innan bilen kan röra sig.";
                 return;
             }
 
             _car.ConsumeFuel();
             _driver.IncreaseFatigue();
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Bilen kör framåt åt {_car.GetDirectionInSwedish()}.");
-            Console.ResetColor();
+            _lastActionMessage = $"Bilen kör framåt åt {_car.GetDirectionInSwedish()}.";
         }
 
         private void DriveBackward()
         {
             if (!_car.HasFuel())
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Bensinen är slut! Du måste tanka innan bilen kan röra sig.");
-                Console.ResetColor();
+                _lastActionMessage = "Bensinen är slut! Du måste tanka innan bilen kan röra sig.";
                 return;
             }
 
             _car.ConsumeFuel();
             _driver.IncreaseFatigue();
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Bilen backar.");
-            Console.ResetColor();
+            _lastActionMessage = "Bilen backar.";
         }
 
         private void RefuelCar()
@@ -236,9 +240,7 @@ namespace CarSimulator.Services
             _car.Refuel();
             _driver.IncreaseFatigue();
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Bilen är nu tankad till sin fulla kapacitet ({_car.MaxFuel:F0} liter).");
-            Console.ResetColor();
+            _lastActionMessage = $"Bilen är nu tankad till sin fulla kapacitet ({_car.MaxFuel:F0} liter).";
         }
     }
 }
