@@ -5,7 +5,6 @@ namespace CarSimulator.Tests.Services
     [TestClass]
     public class MenuServiceTests
     {
-
         [TestMethod]
         public void IsValidMenuChoice_ValidChoices1To3_ShouldReturnTrue()
         {
@@ -24,7 +23,6 @@ namespace CarSimulator.Tests.Services
             Assert.IsTrue(MenuService.IsValidMenuChoice("6"));
             Assert.IsTrue(MenuService.IsValidMenuChoice("7"));
         }
-
 
         [TestMethod]
         public void IsValidMenuChoice_OutOfRangeLow_ShouldReturnFalse()
@@ -66,7 +64,6 @@ namespace CarSimulator.Tests.Services
             Assert.IsFalse(MenuService.IsValidMenuChoice("\t"));
         }
 
-
         [TestMethod]
         public void ParseMenuChoice_ValidChoicesLow_ShouldReturnCorrectNumber()
         {
@@ -103,7 +100,6 @@ namespace CarSimulator.Tests.Services
             Assert.AreEqual(99, MenuService.ParseMenuChoice("99"));
         }
 
-
         [TestMethod]
         public void GetInvalidChoiceMessage_ShouldReturnCorrectMessage()
         {
@@ -114,7 +110,6 @@ namespace CarSimulator.Tests.Services
             Assert.AreEqual("Ogiltigt val! Välj 1-7.", result);
         }
 
-
         [TestMethod]
         public void IsValidMenuChoice_BoundaryValues_ShouldHandleCorrectly()
         {
@@ -123,6 +118,96 @@ namespace CarSimulator.Tests.Services
             Assert.IsTrue(MenuService.IsValidMenuChoice("7"));   // Maximum valid
             Assert.IsFalse(MenuService.IsValidMenuChoice("0"));  // Below minimum
             Assert.IsFalse(MenuService.IsValidMenuChoice("8"));  // Above maximum
+        }
+
+        [TestMethod]
+        public void IsValidMenuChoice_WithLeadingZero_ShouldHandleCorrectly()
+        {
+            // Act & Assert
+            Assert.IsTrue(MenuService.IsValidMenuChoice("01"));
+            Assert.IsTrue(MenuService.IsValidMenuChoice("07"));
+        }
+
+        [TestMethod]
+        public void IsValidMenuChoice_WithSpaces_ShouldReturnFalse()
+        {
+            // Act & Assert
+            Assert.IsFalse(MenuService.IsValidMenuChoice(" 1"));
+            Assert.IsFalse(MenuService.IsValidMenuChoice("1 "));
+            Assert.IsFalse(MenuService.IsValidMenuChoice(" 1 "));
+        }
+
+        [TestMethod]
+        public void ParseMenuChoice_WithDecimal_ShouldReturnNegativeOne()
+        {
+            // Act & Assert
+            Assert.AreEqual(-1, MenuService.ParseMenuChoice("1.0"));
+            Assert.AreEqual(-1, MenuService.ParseMenuChoice("5.5"));
+        }
+
+        // ===== YTTERLIGARE TESTER FÖR BÄTTRE COVERAGE =====
+
+        [TestMethod]
+        public void IsValidMenuChoice_WithDecimal_ShouldReturnFalse()
+        {
+            // Act & Assert
+            Assert.IsFalse(MenuService.IsValidMenuChoice("1.0"));
+            Assert.IsFalse(MenuService.IsValidMenuChoice("5.5"));
+            Assert.IsFalse(MenuService.IsValidMenuChoice("3,5")); // Svensk decimalnotation
+        }
+
+        [TestMethod]
+        public void IsValidMenuChoice_WithTabsAndNewlines_ShouldReturnFalse()
+        {
+            // Act & Assert
+            Assert.IsFalse(MenuService.IsValidMenuChoice("\t1"));
+            Assert.IsFalse(MenuService.IsValidMenuChoice("1\n"));
+            Assert.IsFalse(MenuService.IsValidMenuChoice("\r1\r"));
+        }
+
+        [TestMethod]
+        public void ParseMenuChoice_WithSpaces_ShouldReturnNegativeOne()
+        {
+            // Act & Assert
+            Assert.AreEqual(-1, MenuService.ParseMenuChoice(" 1"));
+            Assert.AreEqual(-1, MenuService.ParseMenuChoice("1 "));
+            Assert.AreEqual(-1, MenuService.ParseMenuChoice(" 1 "));
+        }
+
+        [TestMethod]
+        public void IsValidMenuChoice_ConsistencyTest_ValidChoicesShouldAlsoParseCorrectly()
+        {
+            // Arrange
+            string[] validChoices = { "1", "2", "3", "4", "5", "6", "7" };
+
+            foreach (string choice in validChoices)
+            {
+                // Act & Assert
+                Assert.IsTrue(MenuService.IsValidMenuChoice(choice),
+                    $"Choice '{choice}' should be valid");
+
+                int parsed = MenuService.ParseMenuChoice(choice);
+                Assert.AreEqual(int.Parse(choice), parsed,
+                    $"Choice '{choice}' should parse to {choice}");
+            }
+        }
+
+        [TestMethod]
+        public void IsValidMenuChoice_ConsistencyTest_InvalidChoicesShouldNotParse()
+        {
+            // Arrange
+            string[] invalidChoices = { "0", "8", "abc", " 1", "1.0", "", null };
+
+            foreach (string choice in invalidChoices)
+            {
+                // Act & Assert
+                Assert.IsFalse(MenuService.IsValidMenuChoice(choice),
+                    $"Choice '{choice}' should be invalid");
+
+                int parsed = MenuService.ParseMenuChoice(choice);
+                Assert.AreEqual(-1, parsed,
+                    $"Invalid choice '{choice}' should parse to -1");
+            }
         }
     }
 }
