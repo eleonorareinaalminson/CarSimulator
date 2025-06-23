@@ -1,10 +1,13 @@
-﻿namespace CarSimulator
+﻿using CarSimulator.Services;
+
+namespace CarSimulator
 {
-    internal class Program
+    class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var gameService = new GameService();
+            await gameService.StartGameAsync();
         }
     }
 }
