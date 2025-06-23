@@ -65,7 +65,7 @@ namespace CarSimulator.Tests.Models
         }
 
         [TestMethod]
-        public void ConsumeFuel_ShouldDecreaseFuelByOne()
+        public void ConsumeFuel_ShouldDecreaseFuelByTwo()
         {
             // Arrange
             _sut.Fuel = 10;
@@ -74,7 +74,7 @@ namespace CarSimulator.Tests.Models
             _sut.ConsumeFuel();
 
             // Assert
-            Assert.AreEqual(9, _sut.Fuel);
+            Assert.AreEqual(8, _sut.Fuel); // Ändrat från 9 till 8
         }
 
         [TestMethod]
@@ -263,7 +263,7 @@ namespace CarSimulator.Tests.Models
         }
 
         [TestMethod]
-        public void ConsumeFuel_WithMinimalFuel_ShouldHandleCorrectly()
+        public void ConsumeFuel_WithMinimalFuel_ShouldGoToZero()
         {
             // Arrange
             _sut.Fuel = 0.1;
@@ -305,6 +305,89 @@ namespace CarSimulator.Tests.Models
 
             // Assert
             Assert.AreEqual(originalDirection, _sut.Direction);
+        }
+
+        // ===== NYA TESTER FÖR 2L BRÄNSLEFÖRBRUKNING =====
+
+        [TestMethod]
+        public void ConsumeFuel_WithExactlyTwoLiters_ShouldEmptyTank()
+        {
+            // Arrange
+            _sut.Fuel = 2.0;
+
+            // Act
+            _sut.ConsumeFuel();
+
+            // Assert
+            Assert.AreEqual(0, _sut.Fuel, 0.001);
+        }
+
+        [TestMethod]
+        public void ConsumeFuel_WithOnePointFiveLiters_ShouldGoToZero()
+        {
+            // Arrange
+            _sut.Fuel = 1.5;
+
+            // Act
+            _sut.ConsumeFuel();
+
+            // Assert
+            Assert.AreEqual(0, _sut.Fuel, 0.001);
+        }
+
+        [TestMethod]
+        public void ConsumeFuel_MultipleTimes_ShouldDecreaseProperly()
+        {
+            // Arrange
+            _sut.Fuel = 10;
+
+            // Act
+            _sut.ConsumeFuel(); // 10 -> 8
+            _sut.ConsumeFuel(); // 8 -> 6
+
+            // Assert
+            Assert.AreEqual(6, _sut.Fuel, 0.001);
+        }
+
+        [TestMethod]
+        public void ConsumeFuel_UntilEmpty_ShouldHandleCorrectly()
+        {
+            // Arrange
+            _sut.Fuel = 5; // 5 liter
+
+            // Act & Assert
+            _sut.ConsumeFuel(); // 5 -> 3
+            Assert.AreEqual(3, _sut.Fuel, 0.001);
+
+            _sut.ConsumeFuel(); // 3 -> 1
+            Assert.AreEqual(1, _sut.Fuel, 0.001);
+
+            _sut.ConsumeFuel(); // 1 -> 0 (inte -1)
+            Assert.AreEqual(0, _sut.Fuel, 0.001);
+
+            _sut.ConsumeFuel(); // 0 -> 0 (förblir 0)
+            Assert.AreEqual(0, _sut.Fuel, 0.001);
+        }
+
+        [TestMethod]
+        public void Car_ShouldImplementICar()
+        {
+            // Assert
+            Assert.IsTrue(_sut is ICar);
+        }
+
+        [TestMethod]
+        public void Fuel_ShouldNeverBeNegative()
+        {
+            // Arrange
+            _sut.Fuel = 0.5;
+
+            // Act
+            _sut.ConsumeFuel();
+            _sut.ConsumeFuel(); // Försök konsumera mer än vad som finns
+
+            // Assert
+            Assert.IsTrue(_sut.Fuel >= 0, "Fuel should never be negative");
         }
     }
 }
