@@ -21,10 +21,23 @@
 
         public static int ParseMenuChoice(string choice)
         {
-            if (!IsValidMenuChoice(choice))
+            // Returnera -1 för: null, whitespace, spaces och decimaler
+            if (string.IsNullOrWhiteSpace(choice))
                 return -1;
 
-            return int.Parse(choice);
+            // se att strängen inte har leading/trailing spaces
+            if (choice != choice.Trim())
+                return -1;
+
+            // kolla efter decimaler
+            if (choice.Contains('.') || choice.Contains(','))
+                return -1;
+
+            // Försök parsa - returnera faktiska numret även utanför intervallet
+            if (int.TryParse(choice, out int number))
+                return number;
+
+            return -1;
         }
 
         public static string GetInvalidChoiceMessage()
