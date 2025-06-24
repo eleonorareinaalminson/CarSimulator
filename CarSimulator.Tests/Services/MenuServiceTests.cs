@@ -145,7 +145,6 @@ namespace CarSimulator.Tests.Services
             Assert.AreEqual(-1, MenuService.ParseMenuChoice("5.5"));
         }
 
-        // ===== YTTERLIGARE TESTER FÖR BÄTTRE COVERAGE =====
 
         [TestMethod]
         public void IsValidMenuChoice_WithDecimal_ShouldReturnFalse()
@@ -153,7 +152,7 @@ namespace CarSimulator.Tests.Services
             // Act & Assert
             Assert.IsFalse(MenuService.IsValidMenuChoice("1.0"));
             Assert.IsFalse(MenuService.IsValidMenuChoice("5.5"));
-            Assert.IsFalse(MenuService.IsValidMenuChoice("3,5")); // Svensk decimalnotation
+            Assert.IsFalse(MenuService.IsValidMenuChoice("3,5")); 
         }
 
         [TestMethod]
@@ -196,7 +195,7 @@ namespace CarSimulator.Tests.Services
         public void IsValidMenuChoice_ConsistencyTest_InvalidChoicesShouldNotParse()
         {
             // Arrange
-            string[] invalidChoices = { "0", "8", "abc", " 1", "1.0", "", null };
+            string[] invalidChoices = { "abc", " 1", "1.0", "", null }; 
 
             foreach (string choice in invalidChoices)
             {

@@ -164,15 +164,27 @@ namespace CarSimulator.Tests.Services
         [TestMethod]
         public async Task GetRandomDriver_MultipleCalls_ShouldReturnDifferentDrivers()
         {
+            // Arrange
+            var uniqueDrivers = new HashSet<string>();
+            const int maxAttempts = 15;
+
             // Act
-            var driver1 = await _sut.GetRandomDriverAsync();
-            var driver2 = await _sut.GetRandomDriverAsync();
+            for (int i = 0; i < maxAttempts && uniqueDrivers.Count < 2; i++) // Early exit när 2 hittats
+            {
+                var driver = await _sut.GetRandomDriverAsync();
+
+                if (driver.Name != "Test Förare")
+                {
+                    uniqueDrivers.Add(driver.Name);
+                }
+
+                await Task.Delay(200); // Väntar mellan anrop
+            }
 
             // Assert
-            var isDifferent = driver1.Name != driver2.Name || driver1.Email != driver2.Email;
-            Assert.IsTrue(isDifferent, "Multiple API calls should return different drivers");
+            Assert.IsTrue(uniqueDrivers.Count >= 2,
+                $"Expected at least 2 different drivers, got {uniqueDrivers.Count}");
         }
-
 
         [TestMethod]
         public async Task GetRandomDriver_APIResponse_ShouldHaveConsistentNameProperty()
